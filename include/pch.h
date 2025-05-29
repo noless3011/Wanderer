@@ -1,33 +1,35 @@
 #pragma once
 
 // Standard library
-#include <iostream>
-#include <string>
-#include <vector>
-#include <array>
-#include <map>
-#include <filesystem>
-#include <unordered_map>
-#include <set>
-#include <unordered_set>
-#include <queue>
-#include <stack>
-#include <memory>
-#include <functional>
 #include <algorithm>
+#include <array>
+#include <cassert>
 #include <chrono>
-#include <utility>
-#include <fstream>
-#include <sstream>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
-#include <cassert>
+#include <filesystem>
+#include <fstream>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <queue>
 #include <random>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <variant>
+#include <vector>
 
 // OpenGL and graphics
-#include "glad/glad.h"
-#include "GLFW/glfw3.h"
+#include <glad/glad.h>
+#include <glfw3.h>
 
 // Common macros
 #ifdef _DEBUG

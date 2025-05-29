@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
 #include <glad/glad.h>
-#include "spdlog/spdlog.h"
+#include <spdlog/spdlog.h>
 
 class Shader {
 public:

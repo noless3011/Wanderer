@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "core/Window.h"
 #include "spdlog/spdlog.h"
-#include <iostream>
 
 Window::Window(int width, int height, const std::string& title, bool resizable)
     : m_window(nullptr), m_width(width), m_height(height), m_title(title), m_resizable(resizable) {
