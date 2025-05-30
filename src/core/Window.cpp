@@ -200,11 +200,11 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
     if ([[maybe_unused]] auto* win = static_cast<Window*>(glfwGetWindowUserPointer(window))) {
         if (action == GLFW_PRESS || action == GLFW_REPEAT) {
             // Handle key press events here if needed
-            spdlog::info("Key pressed: {} (scancode: {}, action: {}, mods: {})", key, scancode, action, mods);
+            // spdlog::info("Key pressed: {} (scancode: {}, action: {}, mods: {})", key, scancode, action, mods);
         }
         else if (action == GLFW_RELEASE) {
             // Handle key release events here if needed
-            spdlog::info("Key released: {} (scancode: {}, action: {}, mods: {})", key, scancode, action, mods);
+            // spdlog::info("Key released: {} (scancode: {}, action: {}, mods: {})", key, scancode, action, mods);
         }
     }
     else {
@@ -217,11 +217,11 @@ void Window::mouseButtonCallback(GLFWwindow* window, int button, int action, int
     if ([[maybe_unused]] auto* win = static_cast<Window*>(glfwGetWindowUserPointer(window))) {
         if (action == GLFW_PRESS) {
             // Handle mouse button press events here if needed
-            spdlog::info("Mouse button pressed: {} (action: {}, mods: {})", button, action, mods);
+            // spdlog::info("Mouse button pressed: {} (action: {}, mods: {})", button, action, mods);
         }
         else if (action == GLFW_RELEASE) {
             // Handle mouse button release events here if needed
-            spdlog::info("Mouse button released: {} (action: {}, mods: {})", button, action, mods);
+            // spdlog::info("Mouse button released: {} (action: {}, mods: {})", button, action, mods);
         }
     }
     else {
@@ -232,7 +232,7 @@ void Window::mouseButtonCallback(GLFWwindow* window, int button, int action, int
 void Window::cursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
     if ([[maybe_unused]] auto* win = static_cast<Window*>(glfwGetWindowUserPointer(window))) {
         // Handle cursor position updates here if needed
-        spdlog::info("Cursor position updated: ({}, {})", xpos, ypos);
+        // spdlog::info("Cursor position updated: ({}, {})", xpos, ypos);
     }
     else {
         spdlog::error("Window user pointer is null in cursor position callback.");

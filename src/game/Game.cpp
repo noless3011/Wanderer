@@ -3,20 +3,8 @@
 #include <iostream>
 #include <glad/glad.h>
 #include "spdlog/spdlog.h"
-
-
-const char* gameVertextShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"void main()\n"
-"{\n"
-"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"}\0";
-const char* gameFragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(1.0f, 1.0f, 0.6f, 1.0f); // Yellow color for the triangle\n"
-"}\0";
+#include "graphics/Pipeline.h"
+#include "graphics/Shader.h"
 
 Game::Game() : m_window(nullptr), m_shaderProgram(0), m_VAO(0), m_VBO(0), m_lastFrameTime(0.0f) {
 
@@ -48,122 +36,48 @@ void Game::init(GLFWwindow* window) {
 }
 
 void Game::loadShaders() {
-    spdlog::info("loadShaders: Starting shader loading process.");
+    Pipeline tempPipeline;
 
-    GLenum preError = glGetError();
-    if (preError != GL_NO_ERROR) {
-        spdlog::warn("loadShaders: Pre-existing OpenGL error before creating shaders: {:#x}", preError);
-    }
+    try {
+        LOG_INFO("Current working directory: {}", std::filesystem::current_path().string());
+        std::filesystem::path fragmentShaderPath = "D:\\ProgrammingProjects\\c++\\Wanderer\\assets\\shader\\fragment\\fragment.frag";
+        std::filesystem::path vertexShaderPath = "D:\\ProgrammingProjects\\c++\\Wanderer\\assets\\shader\\vertex\\vertex.vert";
+        // Create shader objects. Compilation happens in their constructors.
+        std::unique_ptr<Shader> vertexShader = std::make_unique<VertexShader>(vertexShaderPath, "VertexShader");
+        std::unique_ptr<Shader> fragmentShader = std::make_unique<FragmentShader>(fragmentShaderPath, "FragmentShader");
 
-    spdlog::info("loadShaders: About to call glCreateShader(GL_VERTEX_SHADER).");
-    unsigned int vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
-    spdlog::info("loadShaders: glCreateShader(GL_VERTEX_SHADER) returned ID: {}", vertexShaderId);
-
-    if (vertexShaderId == 0) {
-        spdlog::error("loadShaders: Failed to create vertex shader object (glCreateShader returned 0).");
-        spdlog::error("This typically means GLAD is not initialized or there's no valid OpenGL context.");
-        GLenum err_vs_create = glGetError();
-        if (err_vs_create != GL_NO_ERROR) {
-            spdlog::error("loadShaders: OpenGL error after vertex glCreateShader failed: {:#x}", err_vs_create);
+        // Check if shaders compiled successfully
+        if (!vertexShader->isCompiled()) {
+            spdlog::error("Vertex shader ({}) compilation failed: {}", vertexShaderPath.string(), vertexShader->getInfoLog());
+            m_shaderProgram = 0; // Ensure m_shaderProgram is 0 on failure
+            return;
         }
-        m_shaderProgram = 0; // Ensure program is marked as invalid
-        return;
-    }
-    spdlog::info("loadShaders: Vertex shader object created successfully (ID: {}).", vertexShaderId);
-
-    spdlog::info("loadShaders: Compiling vertex shader (ID: {})...", vertexShaderId);
-    glShaderSource(vertexShaderId, 1, &gameVertextShaderSource, NULL);
-    glCompileShader(vertexShaderId);
-    spdlog::info("loadShaders: Vertex shader (ID: {}) compilation attempt finished.", vertexShaderId);
-
-    int success_vs;
-    char infoLog_vs[512];
-    glGetShaderiv(vertexShaderId, GL_COMPILE_STATUS, &success_vs);
-    spdlog::info("loadShaders: Vertex shader (ID: {}) GL_COMPILE_STATUS: {}", vertexShaderId, success_vs);
-    if (!success_vs) {
-        glGetShaderInfoLog(vertexShaderId, 512, NULL, infoLog_vs);
-        spdlog::error("loadShaders: ERROR::SHADER::VERTEX::COMPILATION_FAILED (ID: {})\n{}", vertexShaderId, infoLog_vs);
-        glDeleteShader(vertexShaderId);
-        m_shaderProgram = 0;
-        return;
-    }
-
-    spdlog::info("loadShaders: About to call glCreateShader(GL_FRAGMENT_SHADER).");
-    unsigned int fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
-    spdlog::info("loadShaders: glCreateShader(GL_FRAGMENT_SHADER) returned ID: {}", fragmentShaderId);
-
-    if (fragmentShaderId == 0) {
-        spdlog::error("loadShaders: Failed to create fragment shader object (glCreateShader returned 0).");
-        GLenum err_fs_create = glGetError();
-        if (err_fs_create != GL_NO_ERROR) {
-            spdlog::error("loadShaders: OpenGL error after fragment glCreateShader failed: {:#x}", err_fs_create);
+        if (!fragmentShader->isCompiled()) {
+            spdlog::error("Fragment shader ({}) compilation failed: {}", fragmentShaderPath.string(), fragmentShader->getInfoLog());
+            m_shaderProgram = 0; // Ensure m_shaderProgram is 0 on failure
+            return;
         }
-        glDeleteShader(vertexShaderId);
-        m_shaderProgram = 0;
-        return;
-    }
-    spdlog::info("loadShaders: Fragment shader object created successfully (ID: {}).", fragmentShaderId);
 
-    spdlog::info("loadShaders: Compiling fragment shader (ID: {})...", fragmentShaderId);
-    glShaderSource(fragmentShaderId, 1, &gameFragmentShaderSource, NULL);
-    glCompileShader(fragmentShaderId);
-    spdlog::info("loadShaders: Fragment shader (ID: {}) compilation attempt finished.", fragmentShaderId);
+        LOG_INFO("Start attaching shaders to pipeline.");
+        tempPipeline.attachShader(std::move(vertexShader));
+        tempPipeline.attachShader(std::move(fragmentShader));
+        LOG_INFO("Shaders attached to pipeline. Vertex Shader ID: {}, Fragment Shader ID: {}",
+            tempPipeline.findShaderID("VertexShader"), tempPipeline.findShaderID("FragmentShader"));
+        tempPipeline.link();
 
-    int success_fs;
-    char infoLog_fs[512];
-    glGetShaderiv(fragmentShaderId, GL_COMPILE_STATUS, &success_fs);
-    spdlog::info("loadShaders: Fragment shader (ID: {}) GL_COMPILE_STATUS: {}", fragmentShaderId, success_fs);
-    if (!success_fs) {
-        glGetShaderInfoLog(fragmentShaderId, 512, NULL, infoLog_fs);
-        spdlog::error("loadShaders: ERROR::SHADER::FRAGMENT::COMPILATION_FAILED (ID: {})\n{}", fragmentShaderId, infoLog_fs);
-        glDeleteShader(vertexShaderId);
-        glDeleteShader(fragmentShaderId);
-        m_shaderProgram = 0;
-        return;
-    }
-
-    spdlog::info("loadShaders: Creating shader program...");
-    m_shaderProgram = glCreateProgram(); // Assign to member variable
-    if (m_shaderProgram == 0) {
-        spdlog::error("loadShaders: Failed to create shader program (glCreateProgram returned 0).");
-        GLenum err_prog_create = glGetError();
-        if (err_prog_create != GL_NO_ERROR) {
-            spdlog::error("loadShaders: OpenGL error after glCreateProgram failed: {:#x}", err_prog_create);
+        if (tempPipeline.isLinked()) {
+            m_shaderProgram = tempPipeline.getID(); // Get the program ID
+            spdlog::info("Shader program linked successfully. ID: {}", m_shaderProgram);
         }
-        glDeleteShader(vertexShaderId);
-        glDeleteShader(fragmentShaderId);
-        return;
+        else {
+            spdlog::error("Shader pipeline linking failed: {}", tempPipeline.getInfoLog());
+            m_shaderProgram = 0;
+        }
+        tempPipeline.use();
     }
-    spdlog::info("loadShaders: Shader program created (ID: {}). Attaching shaders...", m_shaderProgram);
-
-    glAttachShader(m_shaderProgram, vertexShaderId);
-    glAttachShader(m_shaderProgram, fragmentShaderId);
-    spdlog::info("loadShaders: Shaders attached. Linking program (ID: {})...", m_shaderProgram);
-    glLinkProgram(m_shaderProgram);
-    spdlog::info("loadShaders: Program (ID: {}) linking attempt finished.", m_shaderProgram);
-
-    int success_link;
-    char infoLog_link[512];
-    glGetProgramiv(m_shaderProgram, GL_LINK_STATUS, &success_link);
-    spdlog::info("loadShaders: Program (ID: {}) GL_LINK_STATUS: {}", m_shaderProgram, success_link);
-    if (!success_link) {
-        glGetProgramInfoLog(m_shaderProgram, 512, NULL, infoLog_link);
-        spdlog::error("loadShaders: ERROR::SHADER::PROGRAM::LINKING_FAILED (ID: {})\n{}", m_shaderProgram, infoLog_link);
-        glDeleteProgram(m_shaderProgram);
-        m_shaderProgram = 0; // Mark as failed
-    }
-
-    spdlog::info("loadShaders: Deleting individual shader objects (Vertex ID: {}, Fragment ID: {})...", vertexShaderId, fragmentShaderId);
-    glDeleteShader(vertexShaderId);
-    glDeleteShader(fragmentShaderId);
-    spdlog::info("loadShaders: Individual shader objects deleted.");
-
-    if (m_shaderProgram != 0 && success_link) { // Check m_shaderProgram as it might have been set to 0 on link failure
-        spdlog::info("loadShaders: Shader program (ID: {}) configured successfully.", m_shaderProgram);
-    }
-    else {
-        spdlog::error("loadShaders: Shader program configuration failed.");
-        // m_shaderProgram should already be 0 if there was a critical failure
+    catch (const std::exception& e) {
+        spdlog::error("Exception during shader loading: {}", e.what());
+        m_shaderProgram = 0;
     }
 }
 

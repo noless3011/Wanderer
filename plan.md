@@ -5,10 +5,10 @@
 
 ### Phase 1: Core Rendering & Shader Abstraction (Deadline: June 7, 2025)
 
-- [ ] **Task 1.1:** Create a `Shader` class.
+- [x] **Task 1.1:** Create a `Shader` class.
   - Responsibilities: Load shader source from files, compile vertex and fragment shaders, link them into a shader program, provide methods to use/unuse the program, and set uniforms (though uniforms aren't used yet).
   - Move existing shader source strings from Game.cpp into separate files (e.g., `triangle.vert`, `triangle.frag`).
-- [ ] **Task 1.2:** Refactor `Game::loadShaders` to use the new `Shader` class.
+- [x] **Task 1.2:** Refactor `Game::loadShaders` to use the new `Shader` class.
   - The `Game` class should now have a `Shader` member object (or a smart pointer to one).
 - [ ] **Task 1.3:** Create a `Mesh` class (or struct).
   - Responsibilities: Encapsulate VAO, VBO, EBO (if using index drawing later), vertex data, and vertex attribute configuration.
