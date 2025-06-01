@@ -48,9 +48,7 @@ void Pipeline::attachShader(std::unique_ptr<Shader> shader) {
 
     // Verify attachment (optional, but good for debugging)
     GLint success;
-    glGetProgramiv(m_programID, GL_ATTACHED_SHADERS, &success); // This actually gets the number of attached shaders
-    // A more direct check is not straightforward with glGetProgramiv for a specific shader.
-    // We rely on OpenGL errors if glAttachShader fails.
+    glGetProgramiv(m_programID, GL_ATTACHED_SHADERS, &success);
 
     m_attachedShaders.push_back(std::move(shader)); // shader is now invalid in the caller
     LOG_INFO("Pipeline::attachShader: Shader (ID: {}) attached successfully to program (ID: {}).", shaderID, m_programID);
@@ -131,6 +129,77 @@ void Pipeline::detachShader(std::unique_ptr<Shader> shader) {
     }
     glDetachShader(m_programID, shader->getID());
     LOG_INFO("Sucessfully detach shader {}", shader->getName());
+}
+
+void Pipeline::setUniform(const std::string& name, int value) const {
+    GLint location = getUniformLocation(name);
+    if (location != -1) {
+        glUniform1i(location, value);
+    }
+}
+
+void Pipeline::setUniform(const std::string& name, float value) const {
+    GLint location = getUniformLocation(name);
+    if (location != -1) {
+        glUniform1f(location, value);
+    }
+}
+
+void Pipeline::setUniform(const std::string& name, bool value) const {
+    GLint location = getUniformLocation(name);
+    if (location != -1) {
+        glUniform1i(location, value ? 1 : 0);
+    }
+}
+
+void Pipeline::setUniform(const std::string& name, const glm::vec2& value) const {
+    GLint location = getUniformLocation(name);
+    if (location != -1) {
+        glUniform2fv(location, 1, &value[0]);
+    }
+}
+
+void Pipeline::setUniform(const std::string& name, const glm::vec3& value) const {
+    GLint location = getUniformLocation(name);
+    if (location != -1) {
+        glUniform3fv(location, 1, &value[0]);
+    }
+}
+
+void Pipeline::setUniform(const std::string& name, const glm::vec4& value) const {
+    GLint location = getUniformLocation(name);
+    if (location != -1) {
+        glUniform4fv(location, 1, &value[0]);
+    }
+}
+
+void Pipeline::setUniform(const std::string& name, const glm::mat3& value) const {
+    GLint location = getUniformLocation(name);
+    if (location != -1) {
+        glUniformMatrix3fv(location, 1, GL_FALSE, &value[0][0]);
+    }
+}
+
+void Pipeline::setUniform(const std::string& name, const glm::mat4& value) const {
+    GLint location = getUniformLocation(name);
+    if (location != -1) {
+        glUniformMatrix4fv(location, 1, GL_FALSE, &value[0][0]);
+    }
+}
+
+GLint Pipeline::getUniformLocation(const std::string& name) const {
+    auto it = m_uniformLocationCache.find(name);
+    if (it != m_uniformLocationCache.end()) {
+        return it->second;
+    }
+
+    GLint location = glGetUniformLocation(m_programID, name.c_str());
+    if (location == -1) {
+        LOG_WARN("Pipeline::getUniformLocation: Uniform '{}' not found in shader program (ID: {}).", name, m_programID);
+    }
+
+    m_uniformLocationCache[name] = location;
+    return location;
 }
 
 

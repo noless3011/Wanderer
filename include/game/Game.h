@@ -1,5 +1,8 @@
 #pragma once
 #include <glfw3.h>
+#include "graphics/Pipeline.h"
+#include "graphics/Shader.h"
+#include <glm.hpp>
 
 class Game {
 public:
@@ -23,4 +26,6 @@ private:
     unsigned int m_VBO;
 
     float m_lastFrameTime;
+
+    Pipeline m_pipeline;
 };

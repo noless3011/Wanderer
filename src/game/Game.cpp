@@ -36,7 +36,6 @@ void Game::init(GLFWwindow* window) {
 }
 
 void Game::loadShaders() {
-    Pipeline tempPipeline;
 
     try {
         LOG_INFO("Current working directory: {}", std::filesystem::current_path().string());
@@ -59,21 +58,21 @@ void Game::loadShaders() {
         }
 
         LOG_INFO("Start attaching shaders to pipeline.");
-        tempPipeline.attachShader(std::move(vertexShader));
-        tempPipeline.attachShader(std::move(fragmentShader));
+        m_pipeline.attachShader(std::move(vertexShader));
+        m_pipeline.attachShader(std::move(fragmentShader));
         LOG_INFO("Shaders attached to pipeline. Vertex Shader ID: {}, Fragment Shader ID: {}",
-            tempPipeline.findShaderID("VertexShader"), tempPipeline.findShaderID("FragmentShader"));
-        tempPipeline.link();
+            m_pipeline.findShaderID("VertexShader"), m_pipeline.findShaderID("FragmentShader"));
+        m_pipeline.link();
 
-        if (tempPipeline.isLinked()) {
-            m_shaderProgram = tempPipeline.getID(); // Get the program ID
+        if (m_pipeline.isLinked()) {
+            m_shaderProgram = m_pipeline.getID(); // Get the program ID
             spdlog::info("Shader program linked successfully. ID: {}", m_shaderProgram);
         }
         else {
-            spdlog::error("Shader pipeline linking failed: {}", tempPipeline.getInfoLog());
+            spdlog::error("Shader pipeline linking failed: {}", m_pipeline.getInfoLog());
             m_shaderProgram = 0;
         }
-        tempPipeline.use();
+        m_pipeline.use();
     }
     catch (const std::exception& e) {
         spdlog::error("Exception during shader loading: {}", e.what());
@@ -109,7 +108,6 @@ void Game::run() {
         float currentFrameTime = static_cast<float>(glfwGetTime());
         float deltaTime = currentFrameTime - m_lastFrameTime;
         m_lastFrameTime = currentFrameTime;
-
         processInput();
         update(deltaTime);
         render();
@@ -125,6 +123,13 @@ void Game::processInput() {
 }
 
 void Game::update(float deltaTime [[maybe_unused]] ) {
+
+    float timeValue = glfwGetTime();
+    float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+    float redValue = (cos(timeValue) / 2.0f) + 0.5f;
+    float blueValue = (sin(timeValue) / 2.0f) + 0.5f;
+    glm::vec4 color(redValue, greenValue, blueValue, 1.0f);
+    m_pipeline.setUniform("ourColor", color);
 
 }
 
