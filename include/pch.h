@@ -3,6 +3,7 @@
 // Standard library
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <cmath>
@@ -14,6 +15,8 @@
 #include <iostream> // Still useful for non-logging output or if spdlog uses it
 #include <map>
 #include <memory>
+#include <mutex>
+#include <bitset>
 #include <queue>
 #include <random>
 #include <set>
@@ -21,6 +24,7 @@
 #include <stack>
 #include <string>
 #include <string_view>
+#include <typeindex>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -37,6 +41,11 @@
 // OpenGL and graphics
 #include <glad/glad.h>
 #include <glfw3.h>
+
+// Math library - GLM
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
 
 // Logging library - spdlog
 #include <spdlog/common.h>
